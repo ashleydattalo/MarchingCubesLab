@@ -157,7 +157,7 @@ int main()
     const GLchar* vertexShaderSrc = 
         "#version 330 core\n"
         "layout (location = 0) in vec3 pos;\n"
-        "layout (location = 1) in vec3 col;\n"
+        // "layout (location = 1) in vec3 col;\n"
         "layout (location = 2) in vec3 force;\n"
 
         "uniform mat4 model;\n"
@@ -172,15 +172,16 @@ int main()
         "{\n"
             // "outPos += force * pos;\n"
             "outPos = pos + force;\n"
-            "outPos.y -= .1 * sin(cos(pos.x));\n"
-            "outPos.x += .1 * cos(10*pos.z);\n"
+            // "outPos = pos + pos.y*force*0.01;\n"
+            // "outPos.y -= .1 * sin(cos(pos.x));\n"
+            // "outPos.x += .1 * cos(10*pos.z);\n"
 
 
             // "gl_Position = projection * view * model * vec4(outPos, 1.0f);\n"
             "gl_Position = projection * view *  vec4(outPos, 1.0f);\n"
 
             "gl_PointSize = 1;\n"
-            "color = col;\n"
+            "color = vec3(1.0f);\n"
 
         "}\n";
 
@@ -287,6 +288,7 @@ int main()
     //     std::cout << std::endl;
     // }
 
+    int strideSize = 6.0f;
     GLuint vbo;
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -294,16 +296,16 @@ int main()
 
     GLint inputAttrib = glGetAttribLocation(program, "pos");
     glEnableVertexAttribArray(inputAttrib);
-    glVertexAttribPointer(inputAttrib, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (GLvoid*)0);
+    glVertexAttribPointer(inputAttrib, 3, GL_FLOAT, GL_FALSE, strideSize * sizeof(GLfloat), (GLvoid*)0);
 
 
-    GLint colAttrib = glGetAttribLocation(program, "col");
-    glEnableVertexAttribArray(colAttrib);
-    glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+    // GLint colAttrib = glGetAttribLocation(program, "col");
+    // glEnableVertexAttribArray(colAttrib);
+    // glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, strideSize * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 
     GLint forceAttrib = glGetAttribLocation(program, "force");
     glEnableVertexAttribArray(forceAttrib);
-    glVertexAttribPointer(forceAttrib, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
+    glVertexAttribPointer(forceAttrib, 3, GL_FLOAT, GL_FALSE, strideSize * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 
     // Create transform feedback buffer
     GLuint tbo;
@@ -322,12 +324,24 @@ int main()
     glEnable(GL_DEPTH_TEST);  
     glEnable(GL_PROGRAM_POINT_SIZE);
 
+    double lastTime = glfwGetTime();
+    int nbFrames = 0;
     while (!glfwWindowShouldClose(window))
     {
         // Calculate deltatime of current frame
         GLfloat currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+
+
+        double currentTime = glfwGetTime();
+        nbFrames++;
+        if ( currentTime - lastTime >= 1.0 ){ // If last prinf() was more than 1 sec ago
+            // printf and reset timer
+            // printf("%f ms/frame\n", 1000.0/double(nbFrames));
+            nbFrames = 0;
+            lastTime += 1.0;
+        }
 
         // std::cout << camera.Position.x << " ";
         // std::cout << camera.Position.y << " ";
@@ -387,9 +401,9 @@ int main()
             // }
             for (int j = 0; j < data.size()/3; j++) {
                 // printf("%f ", data[j]);
-                data[9*j] = feedback[3*j];
-                data[9*j+1] = feedback[3*j+1];
-                data[9*j+2] = feedback[3*j+2];
+                data[strideSize*j] = feedback[3*j];
+                data[strideSize*j+1] = feedback[3*j+1];
+                data[strideSize*j+2] = feedback[3*j+2];
             }
             glBufferSubData(GL_ARRAY_BUFFER, 0, data.size()*sizeof(float), &data[0]);
 
