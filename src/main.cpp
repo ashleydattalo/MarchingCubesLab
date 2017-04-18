@@ -28,6 +28,7 @@
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mode);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void do_movement();
+void setGravity();
 
 const GLuint WIDTH = 1200, HEIGHT = 1000;
 
@@ -43,84 +44,87 @@ glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
 std::vector<float> data;
 int numVertices = 0;
+int strideSize = 9;
+
+std::vector<glm::vec3> vertices;
 
 Camera camera(glm::vec3(0.0f));
 
-void addLine(glm::vec3 vert1, glm::vec3 vert2) {
+// void addLine(glm::vec3 vert1, glm::vec3 vert2) {
 
-    // std::cout << std::endl <<  "vert1: ";
-    // std::cout << vert1.x << " ";
-    // std::cout << vert1.y << " ";
-    // std::cout << vert1.z << " ";
+//     // std::cout << std::endl <<  "vert1: ";
+//     // std::cout << vert1.x << " ";
+//     // std::cout << vert1.y << " ";
+//     // std::cout << vert1.z << " ";
 
-    // std::cout << "vert2: ";
-    // std::cout << vert2.x << " ";
-    // std::cout << vert2.y << " ";
-    // std::cout << vert2.z << " ";
+//     // std::cout << "vert2: ";
+//     // std::cout << vert2.x << " ";
+//     // std::cout << vert2.y << " ";
+//     // std::cout << vert2.z << " ";
 
-    float minX, maxX;
-    float minY, maxY;
-    float minZ, maxZ;
+//     float minX, maxX;
+//     float minY, maxY;
+//     float minZ, maxZ;
 
-    float step = 5.0f;
-    float incX, incY, incZ;
+//     float step = 5.0f;
+//     float incX, incY, incZ;
 
-    minX = fmin(vert1.x, vert2.x);
-    minY = fmin(vert1.y, vert2.y);
-    minZ = fmin(vert1.z, vert2.z);
-    // std::cout << minX << " ";
-    // std::cout << minY << " ";
-    // std::cout << minZ << " ";
+//     minX = fmin(vert1.x, vert2.x);
+//     minY = fmin(vert1.y, vert2.y);
+//     minZ = fmin(vert1.z, vert2.z);
+//     // std::cout << minX << " ";
+//     // std::cout << minY << " ";
+//     // std::cout << minZ << " ";
 
-    maxX = fmax(vert1.x, vert2.x);
-    maxY = fmax(vert1.y, vert2.y);
-    maxZ = fmax(vert1.z, vert2.z);
+//     maxX = fmax(vert1.x, vert2.x);
+//     maxY = fmax(vert1.y, vert2.y);
+//     maxZ = fmax(vert1.z, vert2.z);
 
-    // std::cout << ", ";
-    // std::cout << maxX << " ";
-    // std::cout << maxY << " ";
-    // std::cout << maxZ << " ";
+//     // std::cout << ", ";
+//     // std::cout << maxX << " ";
+//     // std::cout << maxY << " ";
+//     // std::cout << maxZ << " ";
 
-    incX = (maxX-minX)/step;
-    incY = (maxY-minY)/step;
-    incZ = (maxZ-minZ)/step;
+//     incX = (maxX-minX)/step;
+//     incY = (maxY-minY)/step;
+//     incZ = (maxZ-minZ)/step;
     
-    // std::cout << ", ";
-    // std::cout << incX << " ";
-    // std::cout << incY << " ";
-    // std::cout << incZ << " , ";
+//     // std::cout << ", ";
+//     // std::cout << incX << " ";
+//     // std::cout << incY << " ";
+//     // std::cout << incZ << " , ";
 
 
-    for (int i = 1; i < step; i++) {
-        if (vert1.x < vert2.x) {
-            data.push_back(minX + i * incX);
-        }
-        else {
-            data.push_back(maxX - i * incX);   
-        }
-        if (vert1.y < vert2.y) {
-            data.push_back(minY + i * incY);
-        }
-        else {
-            data.push_back(maxY - i * incY);   
-        }
-        if (vert1.z < vert2.z) {
-            data.push_back(minZ + i * incZ);
-        }
-        else {
-            data.push_back(maxZ - i * incZ);   
-        }
+//     for (int i = 1; i < step; i++) {
+//         if (vert1.x < vert2.x) {
+//             data.push_back(minX + i * incX);
+//         }
+//         else {
+//             data.push_back(maxX - i * incX);   
+//         }
+//         if (vert1.y < vert2.y) {
+//             data.push_back(minY + i * incY);
+//         }
+//         else {
+//             data.push_back(maxY - i * incY);   
+//         }
+//         if (vert1.z < vert2.z) {
+//             data.push_back(minZ + i * incZ);
+//         }
+//         else {
+//             data.push_back(maxZ - i * incZ);   
+//         }
         
-        // std::cout << std::endl;
+//         // std::cout << std::endl;
 
-        // std::cout << "   " << minX + i * incX << " ";
-        // std::cout << "   " << minY + i * incY << " ";
-        // std::cout << "   " << minZ + i * incZ << " ";
+//         // std::cout << "   " << minX + i * incX << " ";
+//         // std::cout << "   " << minY + i * incY << " ";
+//         // std::cout << "   " << minZ + i * incZ << " ";
 
-        // numVertices++;
-    }
+//         // numVertices++;
+//     }
 
-}
+// }
 
 int main()
 {
@@ -170,10 +174,10 @@ int main()
 
         "void main()\n"
         "{\n"
-            "outPos.x = vec3(force + pos).x;\n"
-            "outPos.z = vec3(force + pos).z;\n"
-            // "outPos.y -= sin(force.x) + sin(force.y) + sin(force.z);\n"
-            "outPos.y = cos(pos.z) + sin(pos.x);\n"
+            // "outPos.x = vec3(force + pos).x;\n"
+            // "outPos.z = vec3(force + pos).z;\n"
+            // // "outPos.y -= sin(force.x) + sin(force.y) + sin(force.z);\n"
+            // "outPos.y = cos(pos.z) + sin(pos.x);\n"
             
             "outPos = pos + force;\n"
             // "outPos = pos + pos*force*0.01;\n"
@@ -252,24 +256,24 @@ int main()
 
 
     MarchingCubes marchingCubes;
-    std::vector<glm::vec3> vertices = marchingCubes.getVertices();
+    vertices = marchingCubes.getVertices();
     glm::vec3 gridSize = marchingCubes.getGridSize();
     Rainbow rainbow(0, gridSize.y);
     for (glm::vec3 vert : vertices) {
         data.push_back(vert.x);
+        data.push_back(vert.y);
+        data.push_back(vert.z);
 
         numVertices++;
 
         // float dir = vert.x - marchingCubes.getCenter().x;
         glm::vec3 col = rainbow.getColor(vert.y);
         data.push_back(col.x);
-        data.push_back(vert.z);
         data.push_back(col.y);
-        data.push_back(vert.y);
         data.push_back(col.z);
 
-        glm::vec3 force = glm::normalize(marchingCubes.getCenter()-vert);
 
+        glm::vec3 force = glm::normalize(marchingCubes.getCenter()-vert);
         data.push_back(randFloat(-1, 1) * force.x);
         data.push_back(randFloat(-1, 1) * force.y);
         data.push_back(randFloat(-1, 1) * force.z);
@@ -298,18 +302,21 @@ int main()
 
     GLint inputAttrib = glGetAttribLocation(program, "pos");
     glEnableVertexAttribArray(inputAttrib);
-    glVertexAttribPointer(inputAttrib, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (GLvoid*)0);
+    glVertexAttribPointer(inputAttrib, 3, GL_FLOAT, GL_FALSE, strideSize * sizeof(GLfloat), (GLvoid*)0);
 
 
     GLint colAttrib = glGetAttribLocation(program, "col");
     glEnableVertexAttribArray(colAttrib);
-    glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+    glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, strideSize * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 
     GLint forceAttrib = glGetAttribLocation(program, "force");
     glEnableVertexAttribArray(forceAttrib);
-    glVertexAttribPointer(forceAttrib, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
+    glVertexAttribPointer(forceAttrib, 3, GL_FLOAT, GL_FALSE, strideSize * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
 
-    // Create transform feedback buffer
+    // Create transform feedback
+    std::vector<float> feedback;
+    feedback.resize(data.size()/2);
+    
     GLuint tbo;
     glGenBuffers(1, &tbo);
     glBindBuffer(GL_ARRAY_BUFFER, tbo);
@@ -317,8 +324,6 @@ int main()
 
 
     glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, tbo);
-    std::vector<float> feedback;
-    feedback.resize(data.size()/2);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
 
@@ -403,9 +408,9 @@ int main()
             // }
             for (int j = 0; j < data.size()/3; j++) {
                 // printf("%f ", data[j]);
-                data[9*j] = feedback[3*j];
-                data[9*j+1] = feedback[3*j+1];
-                data[9*j+2] = feedback[3*j+2];
+                data[strideSize*j] = feedback[3*j];
+                data[strideSize*j+1] = feedback[3*j+1];
+                data[strideSize*j+2] = feedback[3*j+2];
             }
             glBufferSubData(GL_ARRAY_BUFFER, 0, data.size()*sizeof(float), &data[0]);
 
@@ -426,12 +431,45 @@ int main()
     return 0;
 }
 
+void setGravity() {
+
+    // for (glm::vec3 vert : vertices) {
+    //     data.push_back(vert.x);
+    //     data.push_back(vert.y);
+    //     data.push_back(vert.z);
+
+    //     numVertices++;
+
+    //     // float dir = vert.x - marchingCubes.getCenter().x;
+    //     glm::vec3 col = rainbow.getColor(vert.y);
+    //     data.push_back(col.x);
+    //     data.push_back(col.y);
+    //     data.push_back(col.z);
+
+
+    //     glm::vec3 force = glm::normalize(marchingCubes.getCenter()-vert);
+    //     data.push_back(randFloat(-1, 1) * force.x);
+    //     data.push_back(randFloat(-1, 1) * force.y);
+    //     data.push_back(randFloat(-1, 1) * force.z);
+    // }
+
+    for (int j = 0; j < data.size()/3; j++) {
+        // printf("%f ", data[j]);
+        // data[6*j] = 0;
+        data[0*j+1] = -9.8;
+        // data[6*j+2] =0;
+    }
+}
+
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mode) {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GL_TRUE);
     }    
     if (key == GLFW_KEY_SLASH && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GL_TRUE);
+    }
+    if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
+        setGravity();
     }
     if(action == GLFW_PRESS)
         keys[key] = true;
