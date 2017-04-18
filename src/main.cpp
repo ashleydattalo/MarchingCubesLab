@@ -170,8 +170,10 @@ int main()
 
         "void main()\n"
         "{\n"
-            "outPos += force * pos;\n"
-            "outPos = force + pos;\n"
+            "outPos = pos;\n"
+            "outPos.x = vec3(force + pos).x;\n"
+            "outPos.y = sin(outPos.x);\n"
+            "outPos.z += sin(outPos.y);\n"
             // "outPos = pos + pos*force*0.01;\n"
             // "outPos.y -= .1 * sin(cos(pos.x));\n"
             // "outPos.x += .1 * cos(10*pos.z);\n"
