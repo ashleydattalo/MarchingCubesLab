@@ -170,7 +170,7 @@ int main()
         "uniform mat4 projection;\n"
 
         
-        "out vec3 outPos;\n"
+        // "out vec3 outPos;\n"
         "out vec3 color;\n"
 
         "void main()\n"
@@ -180,7 +180,7 @@ int main()
             // // "outPos.y -= sin(force.x) + sin(force.y) + sin(force.z);\n"
             // "outPos.y = cos(pos.z) + sin(pos.x);\n"
             
-            "outPos = pos + force;\n"
+            // "outPos = pos + force;\n"
             // "outPos = pos;\n"
             // "outPos.z += .1;\n"
             // "outPos = pos + pos*force*0.01;\n"
@@ -189,7 +189,7 @@ int main()
 
 
             // "gl_Position = projection * view * model * vec4(outPos, 1.0f);\n"
-            "gl_Position = projection * view *  vec4(outPos, 1.0f);\n"
+            "gl_Position = projection * view *  vec4(pos, 1.0f);\n"
 
             "gl_PointSize = 1;\n"
             "color = col;\n"
@@ -248,8 +248,8 @@ int main()
     glAttachShader(program, shaderVert);
     glAttachShader(program, shaderFrag);
 
-    const GLchar* feedbackVaryings[] = { "outPos" };
-    glTransformFeedbackVaryings(program, 1, feedbackVaryings, GL_INTERLEAVED_ATTRIBS);
+    // const GLchar* feedbackVaryings[] = { "outPos" };
+    // glTransformFeedbackVaryings(program, 1, feedbackVaryings, GL_INTERLEAVED_ATTRIBS);
 
     glLinkProgram(program);
     glUseProgram(program);
@@ -322,13 +322,13 @@ int main()
     std::vector<float> feedback;
     feedback.resize(data.size());
     
-    GLuint tbo;
-    glGenBuffers(1, &tbo);
-    glBindBuffer(GL_ARRAY_BUFFER, tbo);
-    glBufferData(GL_ARRAY_BUFFER, data.size()*sizeof(float), nullptr, GL_STATIC_READ);
+    // GLuint tbo;
+    // glGenBuffers(1, &tbo);
+    // glBindBuffer(GL_ARRAY_BUFFER, tbo);
+    // glBufferData(GL_ARRAY_BUFFER, data.size()*sizeof(float), nullptr, GL_STATIC_READ);
 
 
-    glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, tbo);
+    // glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, tbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
 
@@ -396,28 +396,29 @@ int main()
 
             // Perform feedback transform
             // glEnable(GL_RASTERIZER_DISCARD);
+            glDrawArrays(GL_TRIANGLES, 0, numVertices);
 
-            glBeginTransformFeedback(GL_POINTS);
-                glDrawArrays(GL_POINTS, 0, numVertices);
-            glEndTransformFeedback();
+            // glBeginTransformFeedback(GL_POINTS);
+            //     glDrawArrays(GL_POINTS, 0, numVertices);
+            // glEndTransformFeedback();
 
             // glDisable(GL_RASTERIZER_DISCARD);
             // glFlush();
             glfwSwapBuffers(window);
 
             // Fetch and print results
-            glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, feedback.size()*sizeof(float), &feedback[0]);
+            // glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, feedback.size()*sizeof(float), &feedback[0]);
             // for (int j = 0; j < feedback.size(); j+=3) {
             //     // printf("%d ~ %d: %f %f %f\n", i, j, feedback[j], feedback[j+1], feedback[j+2]);
             //     data[j] = feedback[j];
             // }
-            for (int j = 0; j < numVertices; j++) {
-                // printf("%f ", data[j]);
-                data[strideSize*j] = feedback[3*j];
-                data[strideSize*j+1] = feedback[3*j+1];
-                data[strideSize*j+2] = feedback[3*j+2];
-            }
-            glBufferSubData(GL_ARRAY_BUFFER, 0, data.size()*sizeof(float), &data[0]);
+            // for (int j = 0; j < numVertices; j++) {
+            //     // printf("%f ", data[j]);
+            //     data[strideSize*j] = feedback[3*j];
+            //     data[strideSize*j+1] = feedback[3*j+1];
+            //     data[strideSize*j+2] = feedback[3*j+2];
+            // }
+            // glBufferSubData(GL_ARRAY_BUFFER, 0, data.size()*sizeof(float), &data[0]);
 
 
 
@@ -428,7 +429,7 @@ int main()
     glDeleteShader(shaderVert);
     glDeleteShader(shaderFrag);
 
-    glDeleteBuffers(1, &tbo);
+    // glDeleteBuffers(1, &tbo);
     glDeleteBuffers(1, &vbo);
 
     glDeleteVertexArrays(1, &vao);
