@@ -24,6 +24,7 @@ public:
 
 	std::vector<glm::vec3> getVertices();
 	glm::vec3 getCenter();
+	glm::vec3 getGridSize();
 
 private:
 	std::vector<glm::vec3> vertices;

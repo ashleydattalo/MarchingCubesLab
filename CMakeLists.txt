@@ -9,6 +9,7 @@ set(SOURCES
     src/Particles/Particle.cpp
     src/MarchingCubes.cpp
     src/TransformFeedback.cpp
+    src/Rainbow.cpp
 )
 set(HEADERS
     src/Shader.hpp
@@ -19,6 +20,7 @@ set(HEADERS
     src/MarchingCubes.hpp
     src/constants.hpp
     src/TransformFeedback.hpp
+    src/Rainbow.hpp
 )
 set(SHADERS
 )

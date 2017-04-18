@@ -12,7 +12,7 @@ MarchingCubes::MarchingCubes() {
     X_SIZE = 50.0f;
     Y_SIZE = 50.0f;
     Z_SIZE = 50.0f;
-    inc = 1.0f;
+    inc = 0.5f;
     isoVal = 0.0f;
 
     cx = X_SIZE/2;
@@ -22,6 +22,15 @@ MarchingCubes::MarchingCubes() {
     radius = X_SIZE/2;
     
     init();
+}
+
+bool MarchingCubes::insideSurface(float x, float y, float z) {
+    if (implicitFunction(x, y, z) <= isoVal) {
+        return true;
+    }
+    else {
+        return false;
+    }
 }
 
 void MarchingCubes::init() {
@@ -37,14 +46,14 @@ void MarchingCubes::init() {
                 if (cubeIndex) { 
                     if (edgeTable[cubeIndex] != 0) {   
                         setVertList(edgeTable[cubeIndex]);        
-                        std::cout << std::endl;      
+                        // std::cout << std::endl;      
                         for (int i = 0; triTable[cubeIndex][i] != -1; i++) {
                             int triTableIdx = triTable[cubeIndex][i];
                             // if (addPoint) {                            
                                 glm::vec3 vertex = vertList[triTableIdx];
-                                std::cout << triTableIdx << ": " ;
-                                std::cout << " pt: ";
-                                printVector(vertex);
+                                // std::cout << triTableIdx << ": " ;
+                                // std::cout << " pt: ";
+                                // printVector(vertex);
                                 vertices.push_back(vertex);
                             // }
                         }
@@ -52,16 +61,6 @@ void MarchingCubes::init() {
                 }
             } 
         }        
-    }
-}
-
-
-bool MarchingCubes::insideSurface(float x, float y, float z) {
-    if (implicitFunction(x, y, z) <= isoVal) {
-        return true;
-    }
-    else {
-        return false;
     }
 }
 
@@ -229,5 +228,9 @@ std::vector<glm::vec3> MarchingCubes::getVertices() {
 }
 
 glm::vec3 MarchingCubes::getCenter() {
-    return glm::vec3(X_SIZE/2);
+    return glm::vec3(X_SIZE/2, Y_SIZE/2, Z_SIZE/2);
+}
+
+glm::vec3 MarchingCubes::getGridSize() {
+    return glm::vec3(X_SIZE, Y_SIZE, Z_SIZE);
 }
