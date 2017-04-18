@@ -158,7 +158,7 @@ int main()
         "#version 330 core\n"
         "layout (location = 0) in vec3 pos;\n"
         // "layout (location = 1) in vec3 col;\n"
-        "layout (location = 2) in vec3 force;\n"
+        "layout (location = 1) in vec3 force;\n"
 
         "uniform mat4 model;\n"
         "uniform mat4 view;\n"
@@ -275,7 +275,7 @@ int main()
     std::cout << "numVertices: " << numVertices << std::endl;
 
     // camera.Position = marchingCubes.getCenter();
-    camera.Position = glm::vec3(0,40, 250);
+    camera.Position = glm::vec3(200,40, 550);
 
     // Create input VBO and vertex format
     // GLfloat data[] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
