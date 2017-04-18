@@ -265,18 +265,14 @@ int main()
         // float dir = vert.x - marchingCubes.getCenter().x;
         glm::vec3 col = rainbow.getColor(vert.y);
         data.push_back(col.x);
-        data.push_back(col.y);
         data.push_back(col.z);
-        data.push_back(col.x);
-        data.push_back(col.y);
-        data.push_back(col.z);
-
 
         glm::vec3 force = glm::normalize(marchingCubes.getCenter()-vert);
 
-        // data.push_back(randFloat(-1, 1) * force.x);
-        // data.push_back(randFloat(-1, 1) * force.y);
-        // data.push_back(randFloat(-1, 1) * force.z);
+        data.push_back(randFloat(-1, 1) * force.x);
+        data.push_back(randFloat(-1, 1) * force.y);
+        data.push_back(col.y);
+        data.push_back(randFloat(-1, 1) * force.z);
     }
 
     std::cout << "numVertices: " << numVertices << std::endl;
