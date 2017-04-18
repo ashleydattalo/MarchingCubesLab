@@ -258,20 +258,20 @@ int main()
     for (glm::vec3 vert : vertices) {
         data.push_back(vert.x);
         data.push_back(vert.y);
-        data.push_back(vert.z);
 
         numVertices++;
 
         // float dir = vert.x - marchingCubes.getCenter().x;
         glm::vec3 col = rainbow.getColor(vert.y);
         data.push_back(col.x);
+        data.push_back(vert.z);
+        data.push_back(col.y);
         data.push_back(col.z);
 
         glm::vec3 force = glm::normalize(marchingCubes.getCenter()-vert);
 
         data.push_back(randFloat(-1, 1) * force.x);
         data.push_back(randFloat(-1, 1) * force.y);
-        data.push_back(col.y);
         data.push_back(randFloat(-1, 1) * force.z);
     }
 
