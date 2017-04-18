@@ -9,9 +9,9 @@ void printVector(glm::vec3 toPrint) {
 }
 
 MarchingCubes::MarchingCubes() {
-    X_SIZE = 10.0f;
-    Y_SIZE = 10.0f;
-    Z_SIZE = 10.0f;
+    X_SIZE = 50.0f;
+    Y_SIZE = 50.0f;
+    Z_SIZE = 50.0f;
     inc = 1.0f;
     isoVal = 0.0f;
 
@@ -30,24 +30,20 @@ void MarchingCubes::init() {
         vertList.push_back(glm::vec3(0));
     }
     for (float y = 0; y < Y_SIZE; y +=inc) {
-        // std::cout << "y = " << y << std::endl;
         for (float z = 0; z < Z_SIZE; z +=inc) {
             for (float x = 0; x < X_SIZE; x +=inc) {
                 int cubeIndex = getCubeIndex(x, y, z);
                 currPoint = glm::vec3(x, y, z); 
                 if (cubeIndex) { 
-                    // vertices.push_back(x);
-                    // vertices.push_back(y);
-                    // vertices.push_back(z);
-                    // vertices.push_back(1.0f);
                     if (edgeTable[cubeIndex] != 0) {   
-                        setVertList(edgeTable[cubeIndex]);              
-                        for (int i = 0; i < 16 && triTable[cubeIndex][i] != -1; i++) {
+                        setVertList(edgeTable[cubeIndex]);        
+                        std::cout << std::endl;      
+                        for (int i = 0; triTable[cubeIndex][i] != -1; i++) {
                             int triTableIdx = triTable[cubeIndex][i];
                             // if (addPoint) {                            
                                 glm::vec3 vertex = vertList[triTableIdx];
-                                // std::cout << triTableIdx << ": " ;
-                                // std::cout << " pt: ";
+                                std::cout << triTableIdx << ": " ;
+                                std::cout << " pt: ";
                                 printVector(vertex);
                                 vertices.push_back(vertex);
                             // }
@@ -59,27 +55,9 @@ void MarchingCubes::init() {
     }
 }
 
-float MarchingCubes::implicitFunction(float x, float y, float z) {
-    float xComp, yComp, zComp, outPut;
-    xComp = pow(x - cx, 2);
-    yComp = pow(y - cy, 2);
-    zComp = pow(z - cz, 2);
-
-    return xComp + yComp + zComp - (radius * radius);
-
-    // // return ((x*x + y*y -1) * (x*x + y*y -1) * (x*x + y*y -1)) -(x*x*y*y*y);
-    // // return sin(x+y) - cos(x*y) + z;
-    // // return x*x*x-3*x -2*y*y;
-    // // return z*y -x*x;
-    // // return cos(x+y)-z*sin(x-y)-4;
-
-    // glm::vec3 Pos = glm::vec3(x, y, z);
-    // glm::vec3 P = Pos * 3.0f;
-    // return sinf(P.x * P.y + P.x * P.z + P.y * P.z) + sinf(P.x * P.y) + sinf(P.y * P.z) + sinf(P.x * P.z) - 1.0f;
-}
 
 bool MarchingCubes::insideSurface(float x, float y, float z) {
-    if (implicitFunction(x, y, z) == isoVal) {
+    if (implicitFunction(x, y, z) <= isoVal) {
         return true;
     }
     else {
@@ -224,6 +202,32 @@ void MarchingCubes::setVertList(int edgeTableVal) {
     }
 }
 
+
+
+float MarchingCubes::implicitFunction(float x, float y, float z) {
+    float xComp, yComp, zComp, outPut;
+    xComp = pow(x - cx, 2);
+    yComp = pow(y - cy, 2);
+    zComp = pow(z - cz, 2);
+
+    return xComp + yComp + zComp - (radius * radius);
+
+    // // return ((x*x + y*y -1) * (x*x + y*y -1) * (x*x + y*y -1)) -(x*x*y*y*y);
+    // // return sin(x+y) - cos(x*y) + z;
+    // // return x*x*x-3*x -2*y*y;
+    // // return z*y -x*x;
+    // // return cos(x+y)-z*sin(x-y)-4;
+
+    // glm::vec3 Pos = glm::vec3(x, y, z);
+    // glm::vec3 P = Pos * 3.0f;
+    // return sinf(P.x * P.y + P.x * P.z + P.y * P.z) + sinf(P.x * P.y) + sinf(P.y * P.z) + sinf(P.x * P.z) - 1.0f;
+}
+
+
 std::vector<glm::vec3> MarchingCubes::getVertices() {
     return vertices;
+}
+
+glm::vec3 MarchingCubes::getCenter() {
+    return glm::vec3(X_SIZE/2);
 }

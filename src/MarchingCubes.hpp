@@ -23,6 +23,7 @@ public:
 	void setVertList(int edgeTableVal);
 
 	std::vector<glm::vec3> getVertices();
+	glm::vec3 getCenter();
 
 private:
 	std::vector<glm::vec3> vertices;

@@ -152,92 +152,9 @@ int main()
         return -1;
     }    
 
-    //transform feedback
-    const GLchar* vertexShaderSrc = 
-        "#version 330 core\n"
-        "layout (location = 0) in vec3 pos;\n"
-        "layout (location = 1) in float col;\n"
+    Shader *shader = new Shader(SHADER_PATH "default.vert", SHADER_PATH "default.frag");
+    // GLint shader->getProg() = shader->getProg();
 
-        "uniform mat4 model;\n"
-        "uniform mat4 view;\n"
-        "uniform mat4 projection;\n"
-        
-        "out vec4 outPos;\n"
-        "out float color;\n"
-
-        "void main()\n"
-        "{\n"
-            "outPos = vec4(pos, col);\n"
-            // "outPos.w += .01;\n"
-            // "outPos.y = sin(pos.x + pos.z);\n"
-
-            // "gl_Position = projection * view * model * vec4(outPos, 1.0f);\n"
-            "gl_Position = projection * view *  vec4(outPos.xyz, 1.0f);\n"
-
-            "gl_PointSize = 2;\n"
-            "color = col;\n"
-
-        "}\n";
-
-        // Fragment shader
-    const GLchar* fragShaderSrc =
-        "#version 330 core\n"
-
-        "in float color;\n"
-        "out vec4 outColor;\n"
-
-        "void main()\n"
-        "{\n"
-            // "vec2 cord = 2.0 * gl_PointCoord - 1.0;\n"
-            // "if (dot(cord, cord) <= 1.0f) {\n"
-            //     "outColor = vec4(1.0f);\n"
-            // "}\n"
-            // "else { outColor = vec4(0.0f);}\n"
-            "outColor = vec4(1.0f);\n"
-        "}\n";
-
-
-    GLint success;
-    GLchar infoLog[512];
-    // Compile shaderVert
-    GLuint shaderVert = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(shaderVert, 1, &vertexShaderSrc, NULL);
-    glCompileShader(shaderVert);
-
-    glGetShaderiv(shaderVert, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(shaderVert, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-    }
-
-    // Compile shaderFrag
-    GLuint shaderFrag = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(shaderFrag, 1, &fragShaderSrc, NULL);
-    glCompileShader(shaderFrag);
-
-    glGetShaderiv(shaderFrag, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(shaderFrag, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-    }
-
-    // Create program and specify transform feedback variables
-    GLuint program = glCreateProgram();
-    glAttachShader(program, shaderVert);
-    glAttachShader(program, shaderFrag);
-
-    const GLchar* feedbackVaryings[] = { "outPos" };
-    glTransformFeedbackVaryings(program, 1, feedbackVaryings, GL_INTERLEAVED_ATTRIBS);
-
-    glLinkProgram(program);
-    glUseProgram(program);
-
-    // Create VAO
-    GLuint vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
 
 
     MarchingCubes marchingCubes;
@@ -248,9 +165,24 @@ int main()
         data.push_back(vert.z);
 
         numVertices++;
-
-        data.push_back(1.0f);
     }
+    // Create VAO
+    GLuint vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+    GLuint vbo;
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, data.size()*sizeof(float), &data[0], GL_STREAM_DRAW);
+
+
+    GLint inputAttrib = glGetAttribLocation(shader->getProg(), "pos");
+    glEnableVertexAttribArray(inputAttrib);
+    glVertexAttribPointer(inputAttrib, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(vao);
 
     std::cout << "numVertices: " << numVertices << std::endl;
 
@@ -266,37 +198,6 @@ int main()
     //     std::cout << data[i+2] << " ";
     //     std::cout << std::endl;
     // }
-
-    GLuint vbo;
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, data.size()*sizeof(float), &data[0], GL_STREAM_DRAW);
-
-    GLint inputAttrib = glGetAttribLocation(program, "pos");
-    glEnableVertexAttribArray(inputAttrib);
-    glVertexAttribPointer(inputAttrib, 3, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
-
-    // GLint forceAttrib = glGetAttribLocation(program, "force");
-    // glEnableVertexAttribArray(forceAttrib);
-    // glVertexAttribPointer(forceAttrib, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-
-    GLint colAttrib = glGetAttribLocation(program, "col");
-    glEnableVertexAttribArray(colAttrib);
-    glVertexAttribPointer(colAttrib, 1, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-
-
-    // Create transform feedback buffer
-    GLuint tbo;
-    glGenBuffers(1, &tbo);
-    glBindBuffer(GL_ARRAY_BUFFER, tbo);
-    glBufferData(GL_ARRAY_BUFFER, data.size()*sizeof(float), nullptr, GL_STATIC_READ);
-
-
-    glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, tbo);
-    std::vector<float> feedback;
-    feedback.resize(data.size());
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
 
     // glDisable(GL_DEPTH_TEST);
     glEnable(GL_DEPTH_TEST);  
@@ -328,9 +229,9 @@ int main()
         glm::mat4 projection = glm::perspective(camera.Zoom, (GLfloat)WIDTH / (GLfloat)HEIGHT, 0.1f, 200.0f);
         // Get the uniform locations
         
-        GLint modelLoc = glGetUniformLocation(program, "model");
-        GLint viewLoc  = glGetUniformLocation(program,  "view");
-        GLint projLoc  = glGetUniformLocation(program,  "projection");
+        GLint modelLoc = glGetUniformLocation(shader->getProg(), "model");
+        GLint viewLoc  = glGetUniformLocation(shader->getProg(),  "view");
+        GLint projLoc  = glGetUniformLocation(shader->getProg(),  "projection");
         // Pass the matrices to the shader
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
@@ -346,36 +247,16 @@ int main()
             // Perform feedback transform
             // glEnable(GL_RASTERIZER_DISCARD);
 
-            glBeginTransformFeedback(GL_POINTS);
-                glDrawArrays(GL_POINTS, 0, numVertices);
-            glEndTransformFeedback();
+            glBindVertexArray(vao);
+            glDrawArrays(GL_POINTS, 0, numVertices);
+            glBindVertexArray(vao);
 
             // glDisable(GL_RASTERIZER_DISCARD);
             // glFlush();
             glfwSwapBuffers(window);
 
-            // Fetch and print results
-            glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, feedback.size()*sizeof(float), &feedback[0]);
-            for (int j = 0; j < data.size(); j+=3) {
-                // printf("%d ~ %d: %f %f %f\n", i, j, feedback[j], feedback[j+1], feedback[j+2]);
-                data[j] = feedback[j];
-            }
-            for (int j = 0; j < data.size(); j++) {
-                // printf("%f ", data[j]);
-                data[j] = feedback[j];
-            }
-            glBufferSubData(GL_ARRAY_BUFFER, 0, data.size()*sizeof(float), &data[0]);
-
-
-
         // Swap the screen buffers
     }
-
-    glDeleteProgram(program);
-    glDeleteShader(shaderVert);
-    glDeleteShader(shaderFrag);
-
-    glDeleteBuffers(1, &tbo);
     glDeleteBuffers(1, &vbo);
 
     glDeleteVertexArrays(1, &vao);
