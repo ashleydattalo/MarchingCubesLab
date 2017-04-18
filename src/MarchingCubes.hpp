@@ -15,13 +15,12 @@ public:
 	MarchingCubes();
 	void init();
 
-	float implicitFunction(float x, float y, float z);
-	bool insideSurface(float x, float y, float z);
-	int getCubeIndex(float x, float y, float z);
-	glm::vec3 getPoint(float vertIdx);
-	glm::vec3 getVertInterp(int vert1Idx, int vert2Idx);
-	void setVertList(int edgeTableVal);
-
+	void setVertList(int cubeIndex);
+	glm::vec3 VertexInterp(glm::vec3 p1, glm::vec3 p2, float v1, float v2);
+	int getCubeIndex();
+	void createGrid(float x, float y, float z);
+	float implicitFunction(glm::vec3 point);
+	
 	std::vector<glm::vec3> getVertices();
 	glm::vec3 getCenter();
 	glm::vec3 getGridSize();
@@ -34,7 +33,7 @@ private:
 	
 	float cx, cy, cz;
 	float inc;
-	float isoVal;
+	float isolevel;
 	float radius;
 	
 	std::vector<glm::vec3> vertList;
@@ -42,8 +41,3 @@ private:
 };
   
 #endif
-
-
-
-
-

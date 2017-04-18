@@ -180,8 +180,8 @@ int main()
             // // "outPos.y -= sin(force.x) + sin(force.y) + sin(force.z);\n"
             // "outPos.y = cos(pos.z) + sin(pos.x);\n"
             
-            // "outPos = pos + force;\n"
-            "outPos = pos;\n"
+            "outPos = pos + force;\n"
+            // "outPos = pos;\n"
             // "outPos.z += .1;\n"
             // "outPos = pos + pos*force*0.01;\n"
             // "outPos.y -= .1 * sin(cos(pos.x));\n"
@@ -320,7 +320,7 @@ int main()
 
     // Create transform feedback
     std::vector<float> feedback;
-    feedback.resize(data.size()/2);
+    feedback.resize(data.size());
     
     GLuint tbo;
     glGenBuffers(1, &tbo);
@@ -411,7 +411,7 @@ int main()
             //     // printf("%d ~ %d: %f %f %f\n", i, j, feedback[j], feedback[j+1], feedback[j+2]);
             //     data[j] = feedback[j];
             // }
-            for (int j = 0; j < data.size()/3; j++) {
+            for (int j = 0; j < numVertices; j++) {
                 // printf("%f ", data[j]);
                 data[strideSize*j] = feedback[3*j];
                 data[strideSize*j+1] = feedback[3*j+1];
