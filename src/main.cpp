@@ -173,7 +173,8 @@ int main()
             "outPos = pos;\n"
             "outPos.x = vec3(force + pos).x;\n"
             "outPos.z = vec3(force + pos).z;\n"
-            "outPos.y = sin(outPos.x);\n"
+            // "outPos.y -= sin(force.x) + sin(force.y) + sin(force.z);\n"
+            "outPos.y = sin(pos.x);\n"
             // "outPos = pos + pos*force*0.01;\n"
             // "outPos.y -= .1 * sin(cos(pos.x));\n"
             // "outPos.x += .1 * cos(10*pos.z);\n"
@@ -277,7 +278,7 @@ int main()
     std::cout << "numVertices: " << numVertices << std::endl;
 
     // camera.Position = marchingCubes.getCenter();
-    camera.Position = glm::vec3(0,40, 250);
+    camera.Position = glm::vec3(0,20, 250);
 
     // Create input VBO and vertex format
     // GLfloat data[] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
