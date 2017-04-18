@@ -170,11 +170,12 @@ int main()
 
         "void main()\n"
         "{\n"
-            "outPos = pos;\n"
             "outPos.x = vec3(force + pos).x;\n"
             "outPos.z = vec3(force + pos).z;\n"
             // "outPos.y -= sin(force.x) + sin(force.y) + sin(force.z);\n"
-            "outPos.y = sin(pos.x);\n"
+            "outPos.y = cos(pos.z) + sin(pos.x);\n"
+            
+            "outPos = pos + force;\n"
             // "outPos = pos + pos*force*0.01;\n"
             // "outPos.y -= .1 * sin(cos(pos.x));\n"
             // "outPos.x += .1 * cos(10*pos.z);\n"
@@ -266,13 +267,16 @@ int main()
         data.push_back(col.x);
         data.push_back(col.y);
         data.push_back(col.z);
+        data.push_back(col.x);
+        data.push_back(col.y);
+        data.push_back(col.z);
 
 
         glm::vec3 force = glm::normalize(marchingCubes.getCenter()-vert);
 
-        data.push_back(randFloat(-1, 1) * force.x);
-        data.push_back(randFloat(-1, 1) * force.y);
-        data.push_back(randFloat(-1, 1) * force.z);
+        // data.push_back(randFloat(-1, 1) * force.x);
+        // data.push_back(randFloat(-1, 1) * force.y);
+        // data.push_back(randFloat(-1, 1) * force.z);
     }
 
     std::cout << "numVertices: " << numVertices << std::endl;
