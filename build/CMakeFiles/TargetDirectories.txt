@@ -1,2 +1,0 @@
-/Users/ashleydattalo/gradGraphics/labs/marchingCubes/build/CMakeFiles/runThis.dir
-/Users/ashleydattalo/gradGraphics/labs/marchingCubes/build/CMakeFiles/run.dir
