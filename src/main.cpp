@@ -49,6 +49,7 @@ int strideSize = 9;
 std::vector<glm::vec3> vertices;
 
 Camera camera(glm::vec3(0.0f));
+MarchingCubes marchingCubes;
 
 // void addLine(glm::vec3 vert1, glm::vec3 vert2) {
 
@@ -179,7 +180,9 @@ int main()
             // // "outPos.y -= sin(force.x) + sin(force.y) + sin(force.z);\n"
             // "outPos.y = cos(pos.z) + sin(pos.x);\n"
             
-            "outPos = pos + force;\n"
+            // "outPos = pos + force;\n"
+            "outPos = pos;\n"
+            // "outPos.z += .1;\n"
             // "outPos = pos + pos*force*0.01;\n"
             // "outPos.y -= .1 * sin(cos(pos.x));\n"
             // "outPos.x += .1 * cos(10*pos.z);\n"
@@ -210,6 +213,8 @@ int main()
             // "else { outColor = vec4(0.0f);}\n"
             "outColor = vec4(color, 1.0f);\n"
         "}\n";
+
+    camera.Position = glm::vec3(marchingCubes.getCenter().x,20, 90);
 
 
     GLint success;
@@ -250,12 +255,7 @@ int main()
     glUseProgram(program);
 
     // Create VAO
-    GLuint vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
 
-
-    MarchingCubes marchingCubes;
     vertices = marchingCubes.getVertices();
     glm::vec3 gridSize = marchingCubes.getGridSize();
     Rainbow rainbow(0, gridSize.y);
@@ -282,7 +282,6 @@ int main()
     std::cout << "numVertices: " << numVertices << std::endl;
 
     // camera.Position = marchingCubes.getCenter();
-    camera.Position = glm::vec3(0,20, 250);
 
     // Create input VBO and vertex format
     // GLfloat data[] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
@@ -294,6 +293,12 @@ int main()
     //     std::cout << data[i+2] << " ";
     //     std::cout << std::endl;
     // }
+
+        GLuint vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+
 
     GLuint vbo;
     glGenBuffers(1, &vbo);
