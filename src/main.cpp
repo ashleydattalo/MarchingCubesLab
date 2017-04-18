@@ -257,7 +257,6 @@ int main()
     Rainbow rainbow(0, gridSize.y);
     for (glm::vec3 vert : vertices) {
         data.push_back(vert.x);
-        data.push_back(vert.y);
 
         numVertices++;
 
@@ -266,6 +265,7 @@ int main()
         data.push_back(col.x);
         data.push_back(vert.z);
         data.push_back(col.y);
+        data.push_back(vert.y);
         data.push_back(col.z);
 
         glm::vec3 force = glm::normalize(marchingCubes.getCenter()-vert);
