@@ -4,6 +4,7 @@
 struct Grid{
    glm::vec3 p[8];
    float val[8];
+   glm::vec3 gradient[8];
 };
 Grid grid;
 
@@ -18,14 +19,16 @@ MarchingCubes::MarchingCubes() {
     X_SIZE = 50.0f;
     Y_SIZE = 50.0f;
     Z_SIZE = 50.0f;
-    inc = 0.5f;
-    isolevel = 0.0f;
+    inc = 1.0f;
+    isolevel = 500.0f;
 
     cx = X_SIZE/2;
     cy = Y_SIZE/2;
     cz = Z_SIZE/2;
 
     radius = X_SIZE/2;
+
+    numVertices = 0;
     
     init();
 }
@@ -34,6 +37,7 @@ void MarchingCubes::init() {
 
     for (int i = 0; i < NUM_EDGES; i++) {
         vertList.push_back(glm::vec3(0));
+        gradList.push_back(glm::vec3(0));
     }
     for (float y = 0; y < Y_SIZE; y +=inc) {
         for (float z = 0; z < Z_SIZE; z +=inc) {
@@ -45,7 +49,10 @@ void MarchingCubes::init() {
                     for (int i = 0; triTable[cubeIndex][i] != -1; i++) {
                         int triTableIdx = triTable[cubeIndex][i]; 
                         glm::vec3 vertex = vertList[triTableIdx];
+                        glm::vec3 normal = gradList[triTableIdx];
                         vertices.push_back(vertex);
+                        normals.push_back(normal);
+                        numVertices++;
                     }
                 }
             } 
@@ -55,47 +62,90 @@ void MarchingCubes::init() {
 }
 
 void MarchingCubes::setVertList(int cubeIndex) {
-    if (edgeTable[cubeIndex] & 1)
-      vertList[0] =
-        VertexInterp(grid.p[0],grid.p[1],grid.val[0],grid.val[1]);
-    if (edgeTable[cubeIndex] & 2)
-      vertList[1] =
-        VertexInterp(grid.p[1],grid.p[2],grid.val[1],grid.val[2]);
-    if (edgeTable[cubeIndex] & 4)
-      vertList[2] =
-        VertexInterp(grid.p[2],grid.p[3],grid.val[2],grid.val[3]);
-    if (edgeTable[cubeIndex] & 8)
-      vertList[3] =
-        VertexInterp(grid.p[3],grid.p[0],grid.val[3],grid.val[0]);
-    if (edgeTable[cubeIndex] & 16)
-      vertList[4] =
-        VertexInterp(grid.p[4],grid.p[5],grid.val[4],grid.val[5]);
-    if (edgeTable[cubeIndex] & 32)
-      vertList[5] =
-        VertexInterp(grid.p[5],grid.p[6],grid.val[5],grid.val[6]);
-    if (edgeTable[cubeIndex] & 64)
-      vertList[6] =
-        VertexInterp(grid.p[6],grid.p[7],grid.val[6],grid.val[7]);
-    if (edgeTable[cubeIndex] & 128)
-      vertList[7] =
-        VertexInterp(grid.p[7],grid.p[4],grid.val[7],grid.val[4]);
-    if (edgeTable[cubeIndex] & 256)
-      vertList[8] =
-        VertexInterp(grid.p[0],grid.p[4],grid.val[0],grid.val[4]);
-    if (edgeTable[cubeIndex] & 512)
-      vertList[9] =
-        VertexInterp(grid.p[1],grid.p[5],grid.val[1],grid.val[5]);
-    if (edgeTable[cubeIndex] & 1024)
-      vertList[10] =
-        VertexInterp(grid.p[2],grid.p[6],grid.val[2],grid.val[6]);
-    if (edgeTable[cubeIndex] & 2048)
-      vertList[11] =
-        VertexInterp(grid.p[3],grid.p[7],grid.val[3],grid.val[7]);
+    if (edgeTable[cubeIndex] & 1) {
+        vertList[0] = VertexInterp(grid.p[0],grid.p[1],grid.val[0],grid.val[1]);
+        gradList[0] = gradInterp(0, 1);
+    }
+
+    if (edgeTable[cubeIndex] & 2) {
+        vertList[1] = VertexInterp(grid.p[1],grid.p[2],grid.val[1],grid.val[2]);
+        gradList[1] = gradInterp(1, 2);
+    }
+
+    if (edgeTable[cubeIndex] & 4) {
+        vertList[2] = VertexInterp(grid.p[2],grid.p[3],grid.val[2],grid.val[3]);
+        gradList[2] = gradInterp(2, 3);
+    }
+
+    if (edgeTable[cubeIndex] & 8) {
+        vertList[3] = VertexInterp(grid.p[3],grid.p[0],grid.val[3],grid.val[0]);
+        gradList[3] = gradInterp(3, 0);
+    }
+
+    if (edgeTable[cubeIndex] & 16) {
+        vertList[4] = VertexInterp(grid.p[4],grid.p[5],grid.val[4],grid.val[5]);
+        gradList[4] = gradInterp(4, 5);
+    }
+
+    if (edgeTable[cubeIndex] & 32) {
+        vertList[5] = VertexInterp(grid.p[5],grid.p[6],grid.val[5],grid.val[6]);
+        gradList[5] = gradInterp(5, 6);
+    }
+
+    if (edgeTable[cubeIndex] & 64) {
+        vertList[6] = VertexInterp(grid.p[6],grid.p[7],grid.val[6],grid.val[7]);
+        gradList[6] = gradInterp(6, 7);
+    }
+
+    if (edgeTable[cubeIndex] & 128) {
+        vertList[7] = VertexInterp(grid.p[7],grid.p[4],grid.val[7],grid.val[4]);
+        gradList[7] = gradInterp(7, 4);
+    }
+
+    if (edgeTable[cubeIndex] & 256) {
+        vertList[8] = VertexInterp(grid.p[0],grid.p[4],grid.val[0],grid.val[4]);
+        gradList[8] = gradInterp(0, 4);
+    }
+
+    if (edgeTable[cubeIndex] & 512) {
+        vertList[9] = VertexInterp(grid.p[1],grid.p[5],grid.val[1],grid.val[5]);
+        gradList[9] = gradInterp(1, 5);
+    }
+
+    if (edgeTable[cubeIndex] & 1024) {
+        vertList[10] = VertexInterp(grid.p[2],grid.p[6],grid.val[2],grid.val[6]);
+        gradList[10] = gradInterp(2, 6);
+    }
+
+    if (edgeTable[cubeIndex] & 2048) {
+        vertList[11] = VertexInterp(grid.p[3],grid.p[7],grid.val[3],grid.val[7]);
+        gradList[11] = gradInterp(3, 7);
+    }
+
+}
+
+glm::vec3 MarchingCubes::gradInterp(int vert1, int vert2) {
+    glm::vec3 grad1 = grid.gradient[vert1];
+    glm::vec3 grad2 = grid.gradient[vert2];
+
+    float v1 = grid.val[vert1];
+    float v2 = grid.val[vert2];
+
+    if (glm::abs(isolevel - v1) < 0.00001f) {
+        return grad1;
+    }
+    if (glm::abs(isolevel - v2) < 0.00001f) {
+        return grad2;
+    }
+    if (glm::abs(v1 - v2) < 0.00001f) {
+        return grad1;
+    }
+
+    float mu = (isolevel - v1) / (v2 - v1);
+    return grad1 + mu * (grad2 - grad1);
 }
 
 glm::vec3 MarchingCubes::VertexInterp(glm::vec3 p1, glm::vec3 p2, float v1, float v2) {
-    glm::vec3 toReturn;
-
     if (glm::abs(isolevel - v1) < 0.00001f) {
         return p1;
     }
@@ -112,14 +162,14 @@ glm::vec3 MarchingCubes::VertexInterp(glm::vec3 p1, glm::vec3 p2, float v1, floa
 
 int MarchingCubes::getCubeIndex() {
     int cubeIndex = 0;
-    if (grid.val[0] <= isolevel) cubeIndex |= 1;
-    if (grid.val[1] <= isolevel) cubeIndex |= 2;
-    if (grid.val[2] <= isolevel) cubeIndex |= 4;
-    if (grid.val[3] <= isolevel) cubeIndex |= 8;
-    if (grid.val[4] <= isolevel) cubeIndex |= 16;
-    if (grid.val[5] <= isolevel) cubeIndex |= 32;
-    if (grid.val[6] <= isolevel) cubeIndex |= 64;
-    if (grid.val[7] <= isolevel) cubeIndex |= 128;
+    if (grid.val[0] < isolevel) cubeIndex |= 1;
+    if (grid.val[1] < isolevel) cubeIndex |= 2;
+    if (grid.val[2] < isolevel) cubeIndex |= 4;
+    if (grid.val[3] < isolevel) cubeIndex |= 8;
+    if (grid.val[4] < isolevel) cubeIndex |= 16;
+    if (grid.val[5] < isolevel) cubeIndex |= 32;
+    if (grid.val[6] < isolevel) cubeIndex |= 64;
+    if (grid.val[7] < isolevel) cubeIndex |= 128;
     return cubeIndex;
 }
 
@@ -133,28 +183,59 @@ void MarchingCubes::createGrid(float x, float y, float z) {
     grid.p[6] = glm::vec3(x + inc, y + inc, z + inc);
     grid.p[7] = glm::vec3(x, y + inc, z + inc);
 
-    grid.val[0] = implicitFunction(grid.p[0]);
-    grid.val[1] = implicitFunction(grid.p[1]);
-    grid.val[2] = implicitFunction(grid.p[2]);
-    grid.val[3] = implicitFunction(grid.p[3]);
-    grid.val[4] = implicitFunction(grid.p[4]);
-    grid.val[5] = implicitFunction(grid.p[5]);
-    grid.val[6] = implicitFunction(grid.p[6]);
-    grid.val[7] = implicitFunction(grid.p[7]);
+    for (int i = 0; i < 8; i++) {
+        grid.val[i] = implicitFunction(grid.p[i]);
+        grid.gradient[i] = getGradient(grid.p[i]);
+    }
+
+
+}
+
+glm::vec3 MarchingCubes::getGradient(glm::vec3 point) {
+    float i, j, k;
+    i = point.x;
+    j = point.y;
+    k = point.z;
+    float delta, dx, dy, dz;
+    delta = 2*inc;
+    dx = delta;
+    dy = delta;
+    dz = delta;
+    float gx = (implicitFunction(i+inc, j, k) - implicitFunction(i-inc, j, k))/dx;
+    float gy = (implicitFunction(i, j+inc, k) - implicitFunction(i, j-inc, k))/dy;
+    float gz = (implicitFunction(i, j, k+inc) - implicitFunction(i, j, k-inc))/dz;
+    return glm::vec3(gx, gy, gz);
 }
 
 
 float MarchingCubes::implicitFunction(glm::vec3 point) {
     float xComp, yComp, zComp;
-    xComp = pow(point.x - cx, 2);
-    yComp = pow(point.y - cy, 2);
-    zComp = pow(point.z - cz, 2);
+    xComp = glm::pow(point.x - cx, 2);
+    yComp = glm::pow(point.y - cy, 2);
+    zComp = glm::pow(point.z - cz, 2);
+
+    return xComp + yComp + zComp - (radius);
+}
+
+float MarchingCubes::implicitFunction(float x, float y, float z) {
+    float xComp, yComp, zComp, outPut;
+    xComp = pow(x - cx, 2);
+    yComp = pow(y - cy, 2);
+    zComp = pow(z - cz, 2);
 
     return xComp + yComp + zComp - (radius * radius);
 }
 
 std::vector<glm::vec3> MarchingCubes::getVertices() {
     return vertices;
+}
+
+std::vector<glm::vec3> MarchingCubes::getNormals() {
+    return normals;
+}
+
+int MarchingCubes::getNumVertices() {
+    return numVertices;
 }
 
 glm::vec3 MarchingCubes::getCenter() {

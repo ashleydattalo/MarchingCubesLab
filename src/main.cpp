@@ -47,6 +47,7 @@ int numVertices = 0;
 int strideSize = 9;
 
 std::vector<glm::vec3> vertices;
+std::vector<glm::vec3> normals;
 
 Camera camera(glm::vec3(0.0f));
 MarchingCubes marchingCubes;
@@ -163,15 +164,16 @@ int main()
         "#version 330 core\n"
         "layout (location = 0) in vec3 pos;\n"
         "layout (location = 1) in vec3 col;\n"
-        "layout (location = 2) in vec3 force;\n"
+        "layout (location = 2) in vec3 norm;\n"
 
         "uniform mat4 model;\n"
         "uniform mat4 view;\n"
         "uniform mat4 projection;\n"
 
         
-        // "out vec3 outPos;\n"
         "out vec3 color;\n"
+        "out vec3 normal;\n"
+        "out vec3 fragPos;\n"
 
         "void main()\n"
         "{\n"
@@ -189,10 +191,12 @@ int main()
 
 
             // "gl_Position = projection * view * model * vec4(outPos, 1.0f);\n"
-            "gl_Position = projection * view *  vec4(pos, 1.0f);\n"
+            "gl_Position = projection * view * vec4(pos, 1.0f);\n"
 
             "gl_PointSize = 1;\n"
             "color = col;\n"
+            "normal = norm;\n"
+            "fragPos = pos;\n"
 
         "}\n";
 
@@ -201,17 +205,38 @@ int main()
     const GLchar* fragShaderSrc =
         "#version 330 core\n"
 
+        "in vec3 normal;\n"
+        "in vec3 fragPos;\n"
         "in vec3 color;\n"
+
+        "uniform vec3 viewPos;\n"
+
         "out vec4 outColor;\n"
 
         "void main()\n"
         "{\n"
-            // "vec2 cord = 2.0 * gl_PointCoord - 1.0;\n"
-            // "if (dot(cord, cord) <= 1.0f) {\n"
-            //     "outColor = vec4(1.0f);\n"
-            // "}\n"
-            // "else { outColor = vec4(0.0f);}\n"
-            "outColor = vec4(color, 1.0f);\n"
+            "vec3 lightColor = vec3(1.0f);\n"
+            "vec3 lightPos = vec3(0.0f, 25.0f, 25.0f);\n"
+            
+            //ambient
+            "float ambientStrength = 0.1f;\n"
+            "vec3 ambient = ambientStrength * lightColor;\n"
+
+            //diffuse
+            "vec3 norm = normalize(normal);\n"
+            "vec3 lightDir = normalize(lightPos - fragPos);\n"
+            "float diff = max(dot(norm, lightDir), 0.0);\n"
+            "vec3 diffuse = diff * lightColor;\n"
+
+            //spec
+            "float specStrength = 0.5f;\n"
+            "vec3 viewDir = normalize(viewPos - fragPos);\n"
+            "vec3 reflectDir = reflect(-lightDir, norm);\n"
+            "float spec = pow(max(dot(viewDir, reflectDir), 0.0), 102);\n"
+            "vec3 specular = specStrength * spec * lightColor;\n"
+
+            "vec3 result = (ambient + diffuse + specular) * color;\n"
+            "outColor = vec4(result, 1.0f);\n"
         "}\n";
 
     camera.Position = glm::vec3(marchingCubes.getCenter().x,20, 90);
@@ -257,14 +282,21 @@ int main()
     // Create VAO
 
     vertices = marchingCubes.getVertices();
+    normals = marchingCubes.getNormals();
+    numVertices = marchingCubes.getNumVertices();
+    
     glm::vec3 gridSize = marchingCubes.getGridSize();
     Rainbow rainbow(0, gridSize.y);
-    for (glm::vec3 vert : vertices) {
+
+    for (int i = 0; i < numVertices; i++) {
+        glm::vec3 vert = vertices[i];
+        glm::vec3 normal = normals[i];
+
         data.push_back(vert.x);
         data.push_back(vert.y);
         data.push_back(vert.z);
 
-        numVertices++;
+        
 
         // float dir = vert.x - marchingCubes.getCenter().x;
         glm::vec3 col = rainbow.getColor(vert.y);
@@ -273,10 +305,14 @@ int main()
         data.push_back(col.z);
 
 
-        glm::vec3 force = glm::normalize(marchingCubes.getCenter()-vert);
-        data.push_back(randFloat(-1, 1) * force.x);
-        data.push_back(randFloat(-1, 1) * force.y);
-        data.push_back(randFloat(-1, 1) * force.z);
+        data.push_back(normal.x);
+        data.push_back(normal.y);
+        data.push_back(normal.z);
+
+        // glm::vec3 force = glm::normalize(marchingCubes.getCenter()-vert);
+        // data.push_back(randFloat(-1, 1) * force.x);
+        // data.push_back(randFloat(-1, 1) * force.y);
+        // data.push_back(randFloat(-1, 1) * force.z);
     }
 
     std::cout << "numVertices: " << numVertices << std::endl;
@@ -314,9 +350,9 @@ int main()
     glEnableVertexAttribArray(colAttrib);
     glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, strideSize * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 
-    GLint forceAttrib = glGetAttribLocation(program, "force");
-    glEnableVertexAttribArray(forceAttrib);
-    glVertexAttribPointer(forceAttrib, 3, GL_FLOAT, GL_FALSE, strideSize * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
+    GLint normalAttrib = glGetAttribLocation(program, "norm");
+    glEnableVertexAttribArray(normalAttrib);
+    glVertexAttribPointer(normalAttrib, 3, GL_FLOAT, GL_FALSE, strideSize * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
 
     // Create transform feedback
     std::vector<float> feedback;
@@ -384,9 +420,9 @@ int main()
         glm::mat4 model;
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
         
-        // GLint centerLoc  = glGetUniformLocation(program,  "rainbowCol");
-        // glm::vec3 center = rainbow.getColor(vert.y);
-        // glUniform3f(centerLoc, center.x, center.y, center.z);
+        GLint camLos  = glGetUniformLocation(program, "viewPos");
+        glm::vec3 camPos = camera.Position;
+        glUniform3f(camLos, camPos.x, camPos.y, camPos.z);
 
 
         static int i = 0;

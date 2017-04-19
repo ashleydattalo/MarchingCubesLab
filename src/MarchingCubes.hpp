@@ -20,13 +20,22 @@ public:
 	int getCubeIndex();
 	void createGrid(float x, float y, float z);
 	float implicitFunction(glm::vec3 point);
+	float implicitFunction(float x, float y, float z);
+
+	glm::vec3 gradInterp(int vert1, int vert2);
+	glm::vec3 getGradient(glm::vec3 point);
 	
 	std::vector<glm::vec3> getVertices();
+	std::vector<glm::vec3> getNormals();
+
+	int getNumVertices();
+
 	glm::vec3 getCenter();
 	glm::vec3 getGridSize();
 
 private:
 	std::vector<glm::vec3> vertices;
+	std::vector<glm::vec3> normals;
 	float X_SIZE;
 	float Y_SIZE;
 	float Z_SIZE;
@@ -35,8 +44,11 @@ private:
 	float inc;
 	float isolevel;
 	float radius;
+
+	int numVertices;
 	
 	std::vector<glm::vec3> vertList;
+	std::vector<glm::vec3> gradList;
 	glm::vec3 currPoint;
 };
   
