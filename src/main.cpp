@@ -216,7 +216,7 @@ int main()
         "void main()\n"
         "{\n"
             "vec3 lightColor = vec3(1.0f);\n"
-            "vec3 lightPos = vec3(0.0f, 25.0f, 25.0f);\n"
+            "vec3 lightPos = vec3(0.0f, 25.0f, 50.0f);\n"
             
             //ambient
             "float ambientStrength = 0.1f;\n"
@@ -401,7 +401,7 @@ int main()
         do_movement();
 
         // Clear the colorbuffer
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Create camera transformations
@@ -427,7 +427,7 @@ int main()
 
         static int i = 0;
         // std::cout << std::endl << i++ << ": ";
-            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            // glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
 
             // Perform feedback transform

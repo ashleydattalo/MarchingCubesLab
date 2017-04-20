@@ -20,7 +20,7 @@ MarchingCubes::MarchingCubes() {
     Y_SIZE = 50.0f;
     Z_SIZE = 50.0f;
     inc = 1.0f;
-    isolevel = 500.0f;
+    isolevel = 10.0f;
 
     cx = X_SIZE/2;
     cy = Y_SIZE/2;
